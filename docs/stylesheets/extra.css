@@ -1,0 +1,79 @@
+/* ══════════════════════════════════════
+   LIGHT MODE
+══════════════════════════════════════ */
+[data-md-color-scheme="default"] {
+   --md-primary-fg-color:        #131416;
+   --md-primary-fg-color--light: #7a8394;
+   --md-primary-fg-color--dark:  #131416;
+   --md-primary-bg-color:        #ffffff;
+   --md-primary-bg-color--light: rgba(255,255,255,0.7);
+ 
+   --md-default-bg-color:        #f5f6f8;
+   --md-default-fg-color:        #131416;
+   --md-default-fg-color--light: #4a5060;
+   --md-default-fg-color--lighter: #8a909e;
+ 
+   --md-typeset-a-color:         #4a6080;
+   --md-accent-fg-color:         #4a6080;
+   --md-accent-fg-color--transparent: rgba(74,96,128,0.1);
+ 
+  /* Code — GitHub light */
+  --md-code-bg-color:             #e8eaed;   /* darker gray background */
+  --md-code-fg-color:             #24292f;
+  --md-code-hl-color:             #d0d6e0;
+  --md-code-hl-keyword-color:     #cf222e;   /* import, from, return, def */
+  --md-code-hl-name-color:        #24292f;   /* plain names */
+  --md-code-hl-function-color:    #8250df;   /* function names → purple */
+  --md-code-hl-string-color:      #0a3069;   /* strings */
+  --md-code-hl-number-color:      #0550ae;   /* numbers */
+  --md-code-hl-comment-color:     #6e7781;   /* comments */
+  --md-code-hl-punctuation-color: #24292f;
+  --md-code-hl-operator-color:    #cf222e;
+  --md-code-hl-constant-color:    #0550ae;
+  --md-code-hl-special-color:     #116329;   /* decorators */
+
+ 
+   /* Header */
+   --header-bg:                  #000000;
+   --header-fg:                  #f0f2f5;
+ }
+ 
+ /* ══════════════════════════════════════
+    DARK MODE
+ ══════════════════════════════════════ */
+ [data-md-color-scheme="slate"] {
+   --md-primary-fg-color:        #e8eaed;
+   --md-primary-fg-color--light: #b0bfce;
+   --md-primary-fg-color--dark:  #4a5a6e;
+   --md-primary-bg-color:        #1a1d23;
+   --md-primary-bg-color--light: rgba(26,29,35,0.7);
+ 
+   --md-default-bg-color:        #16191f;
+   --md-default-fg-color:        #c8cdd6;
+   --md-default-fg-color--light: #8a909e;
+   --md-default-fg-color--lighter: #5a606e;
+ 
+   --md-typeset-a-color:         #8ab0d0;
+   --md-accent-fg-color:         #8ab0d0;
+   --md-accent-fg-color--transparent: rgba(138, 176, 208, 0.1);
+ 
+   /* Code — GitHub dark */
+   --md-code-bg-color:             #000000;
+   --md-code-fg-color:             #e6edf3;
+   --md-code-hl-color:             rgba(74,96,128,0.3);
+   --md-code-hl-keyword-color:     #ff7b72;
+   --md-code-hl-name-color:        #e6edf3;
+   --md-code-hl-function-color:    #d2a8ff;
+   --md-code-hl-string-color:      #a5d6ff;
+   --md-code-hl-number-color:      #79c0ff;
+   --md-code-hl-comment-color:     #8b949e;
+   --md-code-hl-punctuation-color: #e6edf3;
+   --md-code-hl-operator-color:    #ff7b72;
+   --md-code-hl-constant-color:    #79c0ff;
+   --md-code-hl-special-color:     #7ee787;
+ 
+   /* Header */
+   --header-bg:                  #0e1117;
+   --header-fg:                  #ffffff;
+ }
+ 

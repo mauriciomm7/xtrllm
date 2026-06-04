@@ -1,0 +1,33 @@
+# Ignore Python compiled files
+*.pyc
+__pycache__/
+*.egg-info/
+build/
+dist/
+.venv/
+_quarto.yml
+.env
+raw/*.csv
+raw/*.zip
+
+# IGNORE ALL RStudio Crap
+*.Rproj
+.RData
+.Rhistory
+.Ruserdata
+
+#
+site/
+archive/
+dist/
+build/
+*.egg-info/
+src/*.egg-info/
+__pycache__/
+.venv/
+
+# IGNORE FILES
+TODO.md
+
+.vscode/
+smoke_test.py

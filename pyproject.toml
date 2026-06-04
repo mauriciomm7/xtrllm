@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xtrllm"
+version = "0.0.1"
+description = "A lightweight Python framework for portable, versioned, reusable LLM extraction tasks."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Mauricio M. M." },
+]
+keywords = ["llm", "extraction", "pydantic", "structured-output", "dataframes"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "llm",
+    "pydantic>=2.0",
+    "pandas",
+    "python-dotenv",
+    "PyYAML",
+    "ratemate",
+    "sqlite-utils",
+    "tqdm",
+]
+
+[project.urls]
+Homepage = "https://github.com/mauriciomm7/xtrllm"
+Documentation = "https://mauriciomm7.github.io/xtrllm/"
+Repository = "https://github.com/mauriciomm7/xtrllm"
+Issues = "https://github.com/mauriciomm7/xtrllm/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
