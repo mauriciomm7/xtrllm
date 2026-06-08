@@ -11,5 +11,5 @@ cd xtrllm
 pip install -e .
 ```
 
-!!! failure
+!!! failure "Beware"
     Please note that this is under construction. Thank you for you patience.

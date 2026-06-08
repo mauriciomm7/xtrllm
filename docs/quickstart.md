@@ -1,76 +1,157 @@
 # Quickstart
 
-## 🛠️ Installation
+This guide shows the basic `xtrllm` workflow:
 
-*Install* the latest stable release directly from PyPI using pip:
+1. Define a task as a normal Python file.
+2. Load the task directory.
+3. Run the task with `LLMXtractor`.
+4. Scale the same task over a DataFrame with `DataFrameLLMXtractor`.
+
+## Installation
+
+Install the latest stable release from PyPI:
 
 ```shell
 pip install xtrllm
 ```
 
+## Define A Task
 
-## Basic Usage
+An `xtrllm` task is a small Python class that combines three things:
 
-The `xtrllm` package comes pre-loaded with some example tasks that I built for my own projects. However, the idea of this project is that you will create a costum extraction task for tour project say `eulex/tasks/classify_actor.py`, where a single Python file contains the Pydantic schema, the prompt function, and the task function, which returns the design output as a Pydantic-validated schema.
+- a Pydantic schema for the structured output
+- a system prompt with the task rules
+- a `build_prompt()` method that turns Python inputs into the user prompt
 
-The workflow is intentionally simple. First, the user loads a task directory containing Python files with Pydantic schemas, prompt builders, and task classes. Next, an `LLMXtractor` instance is initialized with the desired task and language model. When the extractor is called, it submits the input to the model and returns a structured output validated against the predefined Pydantic schema. This validation layer ensures that only outputs conforming to the expected structure are returned, improving reliability and reducing the likelihood of malformed responses propagating through downstream pipelines.
+For example, a project might keep the following task at `eulex/tasks/classify_actor.py`.
 
 ```python
-import xtrllm
-from xtrllm import load_tasks, LLMXtractor
+from typing import Literal
+from pydantic import BaseModel
+from xtrllm.core.base import BaseTask
 
-# LOAD your paper tasks
-load_tasks("eulex/tasks", namespace="eulex")
+class EulexDBActorSchema(BaseModel):
+    actor_type: Literal[
+        "ACT_TYPE_EU_INST",
+        "ACT_TYPE_NAT_COURT",
+        "ACT_TYPE_GOV_INST_NAT",
+        "ACT_TYPE_GOV_OFFIC_CIT",
+        "ACT_TYPE_GOV_OFFIC_NAT",
+        "ACT_TYPE_PERSON",
+        "ACT_TYPE_UNSPEC",
+    ]
 
-# DEFINE what extractor to run
-extractor = LLMXtractor(task="eulex/eu_lawyers", model="gpt-4.1-mini")
-result = extractor("Komornik Sądowy przy Sądzie Rejonowym w Szczecinku")
 
-# SEE result
-print(result.value)
->>> 'ACT_TYPE_GOV_OFFIC_CIT'
+SYS_MSG = """
+You are an expert in classifying actors into predefined institutional categories.
+
+# Task
+Classify the given actor into EXACTLY ONE predefined actor type.
+
+# Rules
+- Choose the single best matching category.
+- Prefer the most specific category available.
+- If uncertain, choose ACT_TYPE_UNSPEC.
+
+# Examples
+- "Tribunale di Milano" -> ACT_TYPE_NAT_COURT
+- "Procura della Repubblica presso il Tribunale di Cagliari" -> ACT_TYPE_GOV_INST_NAT
+- "Komornik Sądowy przy Sądzie Rejonowym w Szczecinku" -> ACT_TYPE_GOV_OFFIC_CIT
+- "Präsidentin des Landesgerichts Feldkirch" -> ACT_TYPE_GOV_OFFIC_NAT
+"""
+
+class EulexDBClassifyActorsTask(BaseTask):
+    name = "classify_actor"
+    version = "v1"
+    schema = EulexDBActorSchema
+    system_prompt = SYS_MSG
+
+    def build_prompt(self, actor_name: str, context: str = "") -> str:
+        return f"""
+ACTOR:
+{actor_name}
+
+CONTEXT (if available):
+{context}
+
+Classify this actor.
+""".strip()
 ```
 
+The task name is set by the class attribute `name`. When loaded with a namespace, `classify_actor` becomes available as `eulex/classify_actor`.
+
+## Run One Extraction
+
+Use `load_tasks()` to register every task file in a directory, then initialize `LLMXtractor` with the task name and model.
+
+```python
+from xtrllm import LLMXtractor, load_tasks
+
+load_tasks("eulex/tasks", namespace="eulex")
+
+extractor = LLMXtractor(
+    task="eulex/classify_actor",
+    model="gpt-4.1-mini",
+)
+
+result = extractor("Tribunale di Milano")
+
+print(result.actor_type)
+# ACT_TYPE_NAT_COURT
+
+print(result.model_dump(mode="json"))
+# {"actor_type": "ACT_TYPE_NAT_COURT"}
+```
+
+The returned value is the Pydantic model defined by the task schema. You can access fields directly or serialize the model for storage.
 
 ## Batch Processing
 
-In principle, you could use a loop to collect results for all the entries you want to process. However, more often than not, you will be working with DataFrames where multiple parameters are passed as inputs and the goal is to return a new output column. For these cases, you can use batch processing.
+For tabular workflows, `DataFrameLLMXtractor` maps DataFrame columns onto the parameters expected by the task's `build_prompt()` method.
 
-In this example, I use a tool that classifies whether a given sentence of legal text has positive or negative valence toward a set of entities related to the EU legal order, such as the European Court of Justice, EU law, and related institutions. Here, the function takes two parameters, which are expected to correspond to columns in your DataFrame. Passing them as a dictionary mapping means that you do not need to rename your DataFrame columns manually. For example, if the expected parameter is `snippet_text` but your column is called `txt_snippet`, the mapping resolves this internally.
+This example uses the `uot25rev` sentiment-valence task. The source file is `valence_for_entities.py`, but the registered task name in the source code is `sentiment_valence`, so the task is addressed as `uot25rev/sentiment_valence`.
 
 ```python
-# LOAD TASKS from directory
-from xtrllm import load_tasks, DataFrameLLMXtractor
+import pandas as pd
 
-load_tasks(path=r"C:/uot25rev/tasks", namespace="uot25rev")
+from xtrllm import DataFrameLLMXtractor, load_tasks
 
-# DEFINE batch extractor tool parameter mapping
-classify_Sent_LLMXtractor = DataFrameLLMXtractor(
-    task="uot25rev/valence_for_entities",
+load_tasks("uot25rev/tasks", namespace="uot25rev")
+
+df = pd.DataFrame(
+    {
+        "txt_snippet": [
+            "It is particularly unrealistic of THE COMMISSION to expect acceptance of the plan.",
+            "THE COMMISSION submitted its proposal to the Council.",
+        ],
+        "entities": [
+            "THE COMMISSION",
+            "THE COMMISSION",
+        ],
+    }
+)
+
+classify_valence = DataFrameLLMXtractor(
+    task="uot25rev/sentiment_valence",
     model="gpt-4.1-mini",
     parameters={
-        "snippet_text": "snippet_text",
-        "entities_str": "entities_str",
+        "snippet_text": "txt_snippet",
+        "entities_str": "entities",
     },
     result_col="valence",
 )
 
-# LOAD analysis DataFrame
-cmlr_sents_df = pd.read_parquet("C:/uot25rev/data/cmlr_snippets_base.parquet")
-
-# RUN the batch extractor 
-result_df = classify_Sent_LLMXtractor.run_parallel(cmlr_sents_df, rpm=1_000)
+result_df = classify_valence.run_parallel(df, rpm=1_000)
 ```
 
-## Swap Providers — Zero Code Changes
+`parameters` maps task input names to DataFrame column names. In this example, the task expects `snippet_text` and `entities_str`, while the DataFrame columns are named `txt_snippet` and `entities`.
+
+## Swap Providers
+
+Models are routed through the [`llm` plugin ecosystem](https://llm.datasette.io/en/stable/plugins/index.html), so provider changes usually only require changing the model string.
 
 ```python
-LLMXtractor(task="uot25rev/valence_for_entities", model="gpt-4o-mini")
-LLMXtractor(task="uot25rev/valence_for_entities", model="claude-3-5-haiku-latest")
-LLMXtractor(task="uot25rev/valence_for_entities", model="ollama/llama3")
+LLMXtractor(task="uot25rev/sentiment_valence", model="gpt-4o-mini")
+LLMXtractor(task="uot25rev/sentiment_valence", model="claude-3-5-haiku-latest")
+LLMXtractor(task="uot25rev/sentiment_valence", model="ollama/llama3")
 ```
-
-All providers supported via the
-[llm plugin ecosystem](https://llm.datasette.io/en/stable/plugins/index.html).
-
-* * *

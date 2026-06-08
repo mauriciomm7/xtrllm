@@ -68,7 +68,7 @@ NOT a court:
 - "Parchetul de pe lângă Înalta Curte..." → ACT_TYPE_GOV_INST_NAT
 - "Maria Maddalena Acernese et 656 autres juges de paix" → ACT_TYPE_PERSON
 - "Präsidentin des Landesgerichts Feldkirch" → ACT_TYPE_GOV_OFFIC_NAT
--Komornik Sądowy przy Sądzie Rejonowym w Szczecinku → ACT_TYPE_GOV_OFFIC_CIT 
+- Komornik Sądowy przy Sądzie Rejonowym w Szczecinku → ACT_TYPE_GOV_OFFIC_CIT 
 
 IS a court:
 - "Tribunale di Milano" → ACT_TYPE_NAT_COURT
